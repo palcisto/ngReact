@@ -16,6 +16,8 @@
   "license": "MIT",
   "peerDependencies": {
     "angular": "< 2.0.0",
+    "inferno": ">=3.8.0",
+    "inferno-compat": ">=3.8.0",
     "react": ">=0.14.2",
     "react-dom": ">=0.14.2"
   },
@@ -34,6 +36,7 @@
     "grunt-contrib-watch": "1.0.0",
     "grunt-docco": "0.4.0",
     "grunt-karma": "0.12.2",
+    "inferno": "^3.8.0",
     "jasmine-core": "2.4.1",
     "karma": "0.13.22",
     "karma-browserify": "5.0.3",
@@ -41,7 +44,6 @@
     "karma-phantomjs-launcher": "1.0.0",
     "load-grunt-tasks": "3.5.0",
     "phantomjs-prebuilt": "2.1.7",
-    "react": "^15.0.0",
     "react-addons-test-utils": "^15.0.0",
     "react-dom": "^15.0.0",
     "reactify": "1.1.1",
@@ -55,5 +57,8 @@
     "angular",
     "react",
     "ngReact"
-  ]
+  ],
+  "dependencies": {
+    "inferno-create-element": "^3.8.0"
+  }
 }

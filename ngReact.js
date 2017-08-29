@@ -1,59 +1,59 @@
-// # ngReact
-// ### Use React Components inside of your Angular applications
+// # ngInferno
+// ### Use Inferno Components inside of your Angular applications
 //
 // Composed of
-// - reactComponent (generic directive for delegating off to React Components)
-// - reactDirective (factory for creating specific directives that correspond to reactComponent directives)
+// - infernoComponent (generic directive for delegating off to Inferno Components)
+// - infernoDirective (factory for creating specific directives that correspond to infernoComponent directives)
 
 
 (function (root, factory) {
   if (typeof module !== 'undefined' && module.exports) {
     // CommonJS
-    module.exports = factory(require('react'), require('react-dom'), require('angular'));
+    module.exports = factory(require('inferno'), require('angular'));
   } else if (typeof define === 'function' && define.amd) {
     // AMD
-    define(['react', 'react-dom', 'angular'], function (react, reactDOM, angular) {
-      return (root.ngReact = factory(react, reactDOM, angular));
+    define(['inferno', 'angular'], function (inferno, angular) {
+      return (root.ngInferno = factory(inferno, angular));
     });
   } else {
     // Global Variables
-    root.ngReact = factory(root.React, root.ReactDOM, root.angular);
+    root.ngInferno = factory(root.Inferno, root.angular);
   }
-}(this, function ngReact(React, ReactDOM, angular) {
+}(this, function ngInferno(Inferno, angular) {
   'use strict';
 
-  // get a react component from name (components can be an angular injectable e.g. value, factory or
+  // get a inferno component from name (components can be an angular injectable e.g. value, factory or
   // available on window
-  function getReactComponent( name, $injector ) {
+  function getInfernoComponent( name, $injector ) {
     // if name is a function assume it is component and return it
     if (angular.isFunction(name)) {
       return name;
     }
 
-    // a React component name must be specified
+    // a Inferno component name must be specified
     if (!name) {
-      throw new Error('ReactComponent name attribute must be specified');
+      throw new Error('InfernoComponent name attribute must be specified');
     }
 
-    // ensure the specified React component is accessible, and fail fast if it's not
-    var reactComponent;
+    // ensure the specified Inferno component is accessible, and fail fast if it's not
+    var infernoComponent;
     try {
-      reactComponent = $injector.get(name);
+      infernoComponent = $injector.get(name);
     } catch(e) { }
 
-    if (!reactComponent) {
+    if (!infernoComponent) {
       try {
-        reactComponent = name.split('.').reduce(function(current, namePart) {
+        infernoComponent = name.split('.').reduce(function(current, namePart) {
           return current[namePart];
         }, window);
       } catch (e) { }
     }
 
-    if (!reactComponent) {
-      throw Error('Cannot find react component ' + name);
+    if (!infernoComponent) {
+      throw Error('Cannot find inferno component ' + name);
     }
 
-    return reactComponent;
+    return infernoComponent;
   }
 
   // wraps a function with scope.$apply, if already applied just return
@@ -83,7 +83,7 @@
    * work as before, wrapping all functions and won't wrap only when specified.
    *
    * @version 0.4.1
-   * @param obj react component props
+   * @param obj inferno component props
    * @param scope current scope
    * @param propsConfig configuration object for all properties
    * @returns {Object} props with the functions wrapped in scope.$apply
@@ -94,7 +94,7 @@
       var config = (propsConfig || {})[key] || {};
       /**
        * wrap functions in a function that ensures they are scope.$applied
-       * ensures that when function is called from a React component
+       * ensures that when function is called from a Inferno component
        * the Angular digest cycle is run
        */
       prev[key] = angular.isFunction(value) && config.wrapApply !== false
@@ -136,10 +136,10 @@
     }
   }
 
-  // render React component, with scope[attrs.props] being passed in as the component props
+  // render Inferno component, with scope[attrs.props] being passed in as the component props
   function renderComponent(component, props, scope, elem) {
     scope.$evalAsync(function() {
-      ReactDOM.render(React.createElement(component, props), elem[0]);
+      Inferno.render(infernoCreateElement(component, props), elem[0]);
     });
   }
 
@@ -158,7 +158,7 @@
     return (Array.isArray(prop)) ? prop[0] : prop;
   }
 
-  // find the normalized attribute knowing that React props accept any type of capitalization
+  // find the normalized attribute knowing that Inferno props accept any type of capitalization
   function findAttribute(attrs, propName) {
     var index = Object.keys(attrs).filter(function (attr) {
       return attr.toLowerCase() === propName.toLowerCase();
@@ -176,36 +176,36 @@
     return customWatchDepth || defaultWatch;
   }
 
-  // # reactComponent
-  // Directive that allows React components to be used in Angular templates.
+  // # infernoComponent
+  // Directive that allows Inferno components to be used in Angular templates.
   //
   // Usage:
-  //     <react-component name="Hello" props="name"/>
+  //     <inferno-component name="Hello" props="name"/>
   //
-  // This requires that there exists an injectable or globally available 'Hello' React component.
+  // This requires that there exists an injectable or globally available 'Hello' Inferno component.
   // The 'props' attribute is optional and is passed to the component.
   //
   // The following would would create and register the component:
   //
-  //     var module = angular.module('ace.react.components');
-  //     module.value('Hello', React.createClass({
+  //     var module = angular.module('ace.inferno.components');
+  //     module.value('Hello', Inferno.createClass({
   //         render: function() {
   //             return <div>Hello {this.props.name}</div>;
   //         }
   //     }));
   //
-  var reactComponent = function($injector) {
+  var infernoComponent = function($injector) {
     return {
       restrict: 'E',
       replace: true,
       link: function(scope, elem, attrs) {
-        var reactComponent = getReactComponent(attrs.name, $injector);
+        var infernoComponent = getInfernoComponent(attrs.name, $injector);
 
         var renderMyComponent = function() {
           var scopeProps = scope.$eval(attrs.props);
           var props = applyFunctions(scopeProps, scope);
 
-          renderComponent(reactComponent, props, scope, elem);
+          renderComponent(infernoComponent, props, scope, elem);
         };
 
         // If there are props, re-render when they change
@@ -216,10 +216,10 @@
         // cleanup when scope is destroyed
         scope.$on('$destroy', function() {
           if (!attrs.onScopeDestroy) {
-            ReactDOM.unmountComponentAtNode(elem[0]);
+            InfernoDOM.unmountComponentAtNode(elem[0]);
           } else {
             scope.$eval(attrs.onScopeDestroy, {
-              unmountComponent: ReactDOM.unmountComponentAtNode.bind(this, elem[0])
+              unmountComponent: InfernoDOM.unmountComponentAtNode.bind(this, elem[0])
             });
           }
         });
@@ -227,13 +227,13 @@
     };
   };
 
-  // # reactDirective
-  // Factory function to create directives for React components.
+  // # infernoDirective
+  // Factory function to create directives for Inferno components.
   //
   // With a component like this:
   //
-  //     var module = angular.module('ace.react.components');
-  //     module.value('Hello', React.createClass({
+  //     var module = angular.module('ace.inferno.components');
+  //     module.value('Hello', Inferno.createClass({
   //         render: function() {
   //             return <div>Hello {this.props.name}</div>;
   //         }
@@ -241,28 +241,28 @@
   //
   // A directive can be created and registered with:
   //
-  //     module.directive('hello', function(reactDirective) {
-  //         return reactDirective('Hello', ['name']);
+  //     module.directive('hello', function(infernoDirective) {
+  //         return infernoDirective('Hello', ['name']);
   //     });
   //
-  // Where the first argument is the injectable or globally accessible name of the React component
-  // and the second argument is an array of property names to be watched and passed to the React component
+  // Where the first argument is the injectable or globally accessible name of the Inferno component
+  // and the second argument is an array of property names to be watched and passed to the Inferno component
   // as props.
   //
   // This directive can then be used like this:
   //
   //     <hello name="name"/>
   //
-  var reactDirective = function($injector) {
-    return function(reactComponentName, props, conf, injectableProps) {
+  var infernoDirective = function($injector) {
+    return function(infernoComponentName, props, conf, injectableProps) {
       var directive = {
         restrict: 'E',
         replace: true,
         link: function(scope, elem, attrs) {
-          var reactComponent = getReactComponent(reactComponentName, $injector);
+          var infernoComponent = getInfernoComponent(infernoComponentName, $injector);
 
-          // if props is not defined, fall back to use the React component's propTypes if present
-          props = props || Object.keys(reactComponent.propTypes || {});
+          // if props is not defined, fall back to use the Inferno component's propTypes if present
+          props = props || Object.keys(infernoComponent.propTypes || {});
 
           // for each of the properties, get their scope value and set it to scope.props
           var renderMyComponent = function() {
@@ -274,7 +274,7 @@
             });
             scopeProps = applyFunctions(scopeProps, scope, config);
             scopeProps = angular.extend({}, scopeProps, injectableProps);
-            renderComponent(reactComponent, scopeProps, scope, elem);
+            renderComponent(infernoComponent, scopeProps, scope, elem);
           };
 
           // watch each property name and trigger an update whenever something changes,
@@ -292,10 +292,10 @@
           // cleanup when scope is destroyed
           scope.$on('$destroy', function() {
             if (!attrs.onScopeDestroy) {
-              ReactDOM.unmountComponentAtNode(elem[0]);
+              InfernoDOM.unmountComponentAtNode(elem[0]);
             } else {
               scope.$eval(attrs.onScopeDestroy, {
-                unmountComponent: ReactDOM.unmountComponentAtNode.bind(this, elem[0])
+                unmountComponent: InfernoDOM.unmountComponentAtNode.bind(this, elem[0])
               });
             }
           });
@@ -305,8 +305,8 @@
     };
   };
 
-  // create the end module without any dependencies, including reactComponent and reactDirective
-  return angular.module('react', [])
-    .directive('reactComponent', ['$injector', reactComponent])
-    .factory('reactDirective', ['$injector', reactDirective]);
+  // create the end module without any dependencies, including infernoComponent and infernoDirective
+  return angular.module('inferno', [])
+    .directive('infernoComponent', ['$injector', infernoComponent])
+    .factory('infernoDirective', ['$injector', infernoDirective]);
 }));

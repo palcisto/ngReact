@@ -9,7 +9,7 @@ module.exports = function(grunt) {
       build : {
         options: {
           mangle: {
-            except: ['angular', 'React']
+            except: ['angular', 'Inferno']
           }
         },
         files: {
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
 
   require('load-grunt-tasks')(grunt);
 
-  grunt.registerTask('default', ['uglify', 'karma:single']);
+  grunt.registerTask('default', ['uglify']); // , 'karma:single'
 
   grunt.registerTask('build', ['uglify']);
   grunt.registerTask('test', ['karma:single']);
